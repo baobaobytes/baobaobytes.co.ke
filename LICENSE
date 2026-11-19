@@ -1,0 +1,71 @@
+BaobaoBytes Commercial License
+Copyright (c) 2026 BaobaoBytes. All rights reserved.
+
+This repository contains the website, source code, learning content, games,
+graphics, brand names and visual identity of BaobaoBytes (also known as B³),
+published at baobaobytes.co.ke (together, the "Software and Content").
+
+1. Ownership
+   The Software and Content are proprietary and are owned by BaobaoBytes.
+   They are licensed, not sold. No rights are granted except those stated
+   in this license or in a separate written agreement signed by BaobaoBytes.
+
+2. What you may do without a commercial license
+   a. View the public website at baobaobytes.co.ke and use its games and
+      tools for personal, non-commercial learning.
+   b. View this repository's source code if you have been given access to it.
+
+3. What requires a commercial license
+   You may not do any of the following without a commercial license or
+   other prior written permission from BaobaoBytes:
+   a. copy, reproduce, modify, translate or create derivative works of the
+      Software and Content;
+   b. distribute, publish, sublicense, sell, rent or lend them;
+   c. host, deploy or run them, in whole or in part, on any website, app,
+      platform or learning system other than one operated by BaobaoBytes;
+   d. use them to deliver training, sessions, courses or programmes,
+      whether paid or free, in schools, organisations or businesses;
+   e. use the BaobaoBytes or B³ names, the Chipukizi, Wabunifu, Walinzi and
+      Wazazi path identities, logos or visual identity in any way that
+      suggests endorsement or affiliation;
+   f. remove or alter any copyright, license or attribution notices.
+
+4. Commercial licenses
+   Schools, organisations, partners and businesses that want to use,
+   adapt, host or deliver the Software and Content may request a commercial
+   license. Terms, fees and permitted uses are set out in a separate written
+   agreement. Contact: hello@baobaobytes.co.ke
+
+5. Third-party material
+   The following are not owned by BaobaoBytes and are not covered by this
+   license. They remain the property of their owners and are used under
+   their own terms or with permission:
+   a. The "Who Knows: Kenya" name, app icon and screenshots in
+      src/assets/apps/who-knows-kenya/ and site/assets/apps/who-knows-kenya/,
+      which belong to OHB Studio.
+   b. The Fredoka, Lilita One and Sora typefaces, loaded from Google Fonts
+      and licensed under the SIL Open Font License.
+   c. Any other trademark, product or app named on the website, which belongs
+      to its respective owner.
+
+6. No warranty
+   The Software and Content are provided "as is", without warranty of any
+   kind, express or implied, including warranties of merchantability,
+   fitness for a particular purpose and non-infringement. Online safety
+   guidance is educational and does not replace professional, legal or
+   emergency help. In an emergency in Kenya, call 999 or 112, or Childline
+   on 116.
+
+7. Limitation of liability
+   To the fullest extent permitted by law, BaobaoBytes is not liable for any
+   claim, damages or other liability arising from the use of, or inability
+   to use, the Software and Content.
+
+8. Termination
+   Any permission under this license ends automatically if you breach it.
+   On termination you must stop using, and delete, all copies of the
+   Software and Content in your possession.
+
+9. Governing law
+   This license is governed by the laws of the Republic of Kenya. The courts
+   of Kenya have exclusive jurisdiction over any dispute arising from it.
