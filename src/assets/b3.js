@@ -8,6 +8,18 @@ function $(s,r){return (r||document).querySelector(s)}
 function $$(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+/* Visible text. Kiswahili pages load b3-sw.js first, which sets window.B3_SW to override these. */
+var SW=window.B3_SW||{};
+var UI={selected:'Selected, press copy',copied:'Copied ✓',copyNo:'Copy not allowed here',copyAgree:'Copy agreement',
+ question:function(i,n){return 'Question '+i+' of '+n},good:'Nice one! ✅',miss:'Not quite. Here’s why',best:'Best move:',seeBadge:'See my badge',next:'Next',
+ unlocked:'Badge unlocked',spotted:function(s,n){return 'You spotted '+s+' of '+n+' tricks. '},perfect:'Perfect score! 🎉',sharper:'Every try makes you sharper.',
+ earned:'Badge earned',again:'Play again',parentsAll:'You’d handle all three calmly. Share these with another parent.',parentsSome:'Calm first, then act. Try again or read the steps on this page.',
+ kidsAll:'You got every one right. Teach a grown-up one trick you spotted!',kidsSome:'Want to try again? Practice makes you faster in real life.',
+ tapBox:'Now tap a box: “OK to share” or “Keep secret”.',tapCard:'First tap a card above.',sorted:'🎉 All sorted! You know what to keep secret.',
+ yes:function(x){return 'Yes! “'+x+'” goes there.'},secretWhy:function(x){return 'Hmm, think again: a stranger could use “'+x+'” to find you or get into your things.'},
+ shareWhy:function(x){return 'Hmm, think again: “'+x+'” is fine to share. It doesn’t show where you are.'},
+ tickPromises:'Tick a few promises to build your agreement.',agreeTitle:'Our family online agreement'};
+if(SW.ui)for(var uk in SW.ui)UI[uk]=SW.ui[uk];
 
 /* ---- menu ---- */
 var menu=$('.menu'),nav=$('#nav');
@@ -48,13 +60,13 @@ function burst(x,y){
 /* ---- copy buttons ---- */
 function copyText(btn,el,label){
   var t=el.textContent;
-  function sel(){var r=document.createRange();r.selectNodeContents(el);var s=getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='Selected, press copy'}
-  try{navigator.clipboard.writeText(t).then(function(){btn.textContent='Copied ✓';setTimeout(function(){btn.textContent=label},1800)},sel)}catch(x){sel()}
+  function sel(){var r=document.createRange();r.selectNodeContents(el);var s=getSelection();s.removeAllRanges();s.addRange(r);btn.textContent=UI.selected}
+  try{navigator.clipboard.writeText(t).then(function(){btn.textContent=UI.copied;setTimeout(function(){btn.textContent=label},1800)},sel)}catch(x){sel()}
 }
 $$('.mail').forEach(function(m){var b=$('button',m),s=$('span',m);if(b&&s){var l=b.textContent;b.addEventListener('click',function(){copyText(b,s,l)})}});
 
 /* ================= Spot the Trick ================= */
-var BADGE={home:['🌳','Explorer'],chipukizi:['🌱','Safe Online'],wabunifu:['🎨','Creator'],walinzi:['🛡️','Defender'],parents:['🤝','Calm Guide']};
+var BADGE=SW.badge||{home:['🌳','Explorer'],chipukizi:['🌱','Safe Online'],wabunifu:['🎨','Creator'],walinzi:['🛡️','Defender'],parents:['🤝','Calm Guide']};
 var Q={
  chipukizi:[
   {app:['⭐','Star_Gamer','In the game chat'],kind:'chat',msg:'Hi! I’m 10 too 😊 What school do you go to? Maybe we live near each other!',q:'What should you do?',o:[
@@ -115,6 +127,7 @@ var Q={
    ['“You’re not in trouble. We’ll handle this together. Don’t pay.”',1,'Yes. Reassure, don’t pay, save evidence, report on the platform, and call Childline 116 or the police.']]}
  ]
 };
+if(SW.Q)Q=SW.Q;
 Q.home=[Q.chipukizi[1],Q.wabunifu[0],Q.walinzi[1]];
 
 var gameEl=$('#game'),mountGame=function(){};
@@ -127,24 +140,24 @@ if(gameEl){
     screen.innerHTML='<div class="app"><span class="av">'+q.app[0]+'</span><span class="who">'+esc(q.app[1])+'<small>'+esc(q.app[2])+'</small></span></div><div class="bubble '+q.kind+'">'+esc(q.msg)+'</div>';
     var bars='';for(var k=0;k<qs.length;k++)bars+='<i class="'+(k<st.i?'done':k===st.i?'now':'')+'"></i>';
     var opts='';q.o.forEach(function(o,n){opts+='<button type="button" class="opt" data-n="'+n+'"><span class="k">'+'ABC'[n]+'</span><span>'+esc(o[0])+'</span></button>'});
-    quiz.innerHTML='<div class="progress" aria-hidden="true">'+bars+'</div><p class="small">Question '+(st.i+1)+' of '+qs.length+'</p><p class="qtext">'+esc(q.q)+'</p><div class="opts">'+opts+'</div><div class="fb" aria-live="polite"></div>';
+    quiz.innerHTML='<div class="progress" aria-hidden="true">'+bars+'</div><p class="small">'+UI.question(st.i+1,qs.length)+'</p><p class="qtext">'+esc(q.q)+'</p><div class="opts">'+opts+'</div><div class="fb" aria-live="polite"></div>';
     $$('.opt',quiz).forEach(function(b){b.addEventListener('click',function(e){answer(+b.dataset.n,e)})});
   }
   function answer(n,e){
     if(st.answered)return;st.answered=true;
     var q=qs[st.i],pick=q.o[n],good=!!pick[1],best=q.o.filter(function(o){return o[1]})[0][0],last=st.i===qs.length-1;if(good)st.score++;
     $$('.opt',quiz).forEach(function(b,k){b.disabled=true;if(q.o[k][1])b.classList.add('right');else if(k===n)b.classList.add('wrong')});
-    $('.fb',quiz).innerHTML='<div class="feedback'+(good?'':' miss')+'"><b>'+(good?'Nice one! ✅':'Not quite. Here’s why')+'</b>'+esc(pick[2])+(good?'':'<br><strong>Best move:</strong> '+esc(best))+'</div>'+
-      '<div class="ctas" style="margin-top:14px"><button type="button" class="btn next">'+(last?'See my badge':'Next')+' →</button></div>';
+    $('.fb',quiz).innerHTML='<div class="feedback'+(good?'':' miss')+'"><b>'+(good?UI.good:UI.miss)+'</b>'+esc(pick[2])+(good?'':'<br><strong>'+UI.best+'</strong> '+esc(best))+'</div>'+
+      '<div class="ctas" style="margin-top:14px"><button type="button" class="btn next">'+(last?UI.seeBadge:UI.next)+' →</button></div>';
     $('.next',quiz).addEventListener('click',function(){if(last)finish();else{st.i++;renderQ();$('.opt',quiz).focus()}});
     if(good&&e)burst(e.clientX,e.clientY);
   }
   function finish(){
     var b=BADGE[set],n=qs.length,all=st.score===n;
-    screen.innerHTML='<div class="app"><span class="av">'+b[0]+'</span><span class="who">BaobaoBytes<small>Badge unlocked</small></span></div><div class="bubble">You spotted '+st.score+' of '+n+' tricks. '+(all?'Perfect score! 🎉':'Every try makes you sharper.')+'</div>';
-    quiz.innerHTML='<div class="done-card"><div class="badge"><span class="medal" aria-hidden="true">'+b[0]+'</span><div><p class="small">Badge earned</p><h3>'+b[1]+'</h3></div></div><p>'+
-      (set==='parents'?(all?'You’d handle all three calmly. Share these with another parent.':'Calm first, then act. Try again or read the steps on this page.'):(all?'You got every one right. Teach a grown-up one trick you spotted!':'Want to try again? Practice makes you faster in real life.'))+
-      '</p><div class="ctas"><button type="button" class="btn again">Play again</button></div></div>';
+    screen.innerHTML='<div class="app"><span class="av">'+b[0]+'</span><span class="who">BaobaoBytes<small>'+UI.unlocked+'</small></span></div><div class="bubble">'+UI.spotted(st.score,n)+(all?UI.perfect:UI.sharper)+'</div>';
+    quiz.innerHTML='<div class="done-card"><div class="badge"><span class="medal" aria-hidden="true">'+b[0]+'</span><div><p class="small">'+UI.earned+'</p><h3>'+b[1]+'</h3></div></div><p>'+
+      (set==='parents'?(all?UI.parentsAll:UI.parentsSome):(all?UI.kidsAll:UI.kidsSome))+
+      '</p><div class="ctas"><button type="button" class="btn again">'+UI.again+'</button></div></div>';
     $('.again',quiz).addEventListener('click',start);
     if(!calm()){var r=quiz.getBoundingClientRect();for(var k=0;k<3;k++)setTimeout(function(){burst(r.left+r.width*Math.random(),r.top+60)},k*180)}
   }
@@ -152,10 +165,10 @@ if(gameEl){
 }
 
 /* ================= Landing: skin switcher (from the brand preview) ================= */
-var LINES={chipukizi:'Let’s play, and stay safe!',wabunifu:'Create it. Check it. Own it.',walinzi:'Defend. Build. Show your work.',parents:'Calm, practical online safety for your child.'};
+var LINES=SW.lines||{chipukizi:'Let’s play, and stay safe!',wabunifu:'Create it. Check it. Own it.',walinzi:'Defend. Build. Show your work.',parents:'Calm, practical online safety for your child.'};
 var skBtns=$$('.sk button[data-s]');
 if(skBtns.length){
-  var lede=$('#skin-lede'),cta=$('#skin-cta'),LEDE={
+  var lede=$('#skin-lede'),cta=$('#skin-cta'),LEDE=SW.lede||{
     chipukizi:['Games and stories for ages 9–11 to spot tricks, keep secrets safe and know who to tell.','chipukizi.html','Explore Chipukizi'],
     wabunifu:['For creators aged 12–14: check before you post, spot fakes and protect your work.','wabunifu.html','Explore Wabunifu'],
     walinzi:['For ages 15–18: lock down your accounts, beat Kenyan scams and use AI wisely.','walinzi.html','Explore Walinzi'],
@@ -183,16 +196,16 @@ if(tw&&!skBtns.length&&tw.textContent)typeLine(tw.textContent);
 /* ================= Chipukizi: Secret or Share sorter ================= */
 var sorter=$('#sorter');
 if(sorter){
-  var items=[['Your favourite colour','share'],['Your password','secret'],['Your school’s name','secret'],['Your favourite animal','share'],['Your home address','secret'],['A drawing (no face, no name)','share'],['Your phone number','secret'],['The game you like best','share']];
+  var items=SW.sorter||[['Your favourite colour','share'],['Your password','secret'],['Your school’s name','secret'],['Your favourite animal','share'],['Your home address','secret'],['A drawing (no face, no name)','share'],['Your phone number','secret'],['The game you like best','share']];
   var tray=$('.tray',sorter),say=$('.say',sorter),picked=null,placed=0;
   items.forEach(function(it,i){var b=document.createElement('button');b.type='button';b.className='chip';b.textContent=it[0];b.dataset.i=i;tray.appendChild(b);
-    b.addEventListener('click',function(){$$('.chip.picked',sorter).forEach(function(c){c.classList.remove('picked')});picked=b;b.classList.add('picked');say.textContent='Now tap a box: “OK to share” or “Keep secret”.'})});
+    b.addEventListener('click',function(){$$('.chip.picked',sorter).forEach(function(c){c.classList.remove('picked')});picked=b;b.classList.add('picked');say.textContent=UI.tapBox})});
   $$('.bin',sorter).forEach(function(bin){bin.addEventListener('click',function(e){
-    if(!picked)return say.textContent='First tap a card above.';
+    if(!picked)return say.textContent=UI.tapCard;
     var it=items[+picked.dataset.i],right=it[1]===bin.dataset.bin;
     if(right){picked.classList.remove('picked');picked.classList.add(bin.dataset.bin==='share'?'good':'bad');picked.disabled=true;$('.in',bin).appendChild(picked);placed++;burst(e.clientX,e.clientY);
-      say.textContent=placed===items.length?'🎉 All sorted! You know what to keep secret.':'Yes! “'+it[0]+'” goes there.';picked=null}
-    else say.textContent='Hmm, think again: '+(it[1]==='secret'?'a stranger could use “'+it[0]+'” to find you or get into your things.':'“'+it[0]+'” is fine to share. It doesn’t show where you are.');
+      say.textContent=placed===items.length?UI.sorted:UI.yes(it[0]);picked=null}
+    else say.textContent=it[1]==='secret'?UI.secretWhy(it[0]):UI.shareWhy(it[0]);
   })});
   $('.reset',sorter).addEventListener('click',function(){$$('.chip',sorter).forEach(function(c){c.disabled=false;c.className='chip';tray.appendChild(c)});placed=0;picked=null;say.textContent=''});
 }
@@ -200,9 +213,10 @@ if(sorter){
 /* ================= Chipukizi: super password maker ================= */
 var pw=$('#pw');
 if(pw){
-  var A=['Mango','Simba','Twiga','Pilipili','Rocket','Banana','Ndovu','Chapati','Kifaru','Pancake','Thunder','Mandazi','Zebra','Comet','Pineapple','Baobab'];
-  var B=['Dances','Sings','Jumps','Sleeps','Giggles','Paints','Flies','Swims','Bakes','Drums'];
-  var C=['OnTheMoon','InMombasa','AtMidnight','WithSocks','UnderTheBed','OnABus','InTheRain','ByTheLake'];
+  var PW=SW.pw||{};
+  var A=PW.A||['Mango','Simba','Twiga','Pilipili','Rocket','Banana','Ndovu','Chapati','Kifaru','Pancake','Thunder','Mandazi','Zebra','Comet','Pineapple','Baobab'];
+  var B=PW.B||['Dances','Sings','Jumps','Sleeps','Giggles','Paints','Flies','Swims','Bakes','Drums'];
+  var C=PW.C||['OnTheMoon','InMombasa','AtMidnight','WithSocks','UnderTheBed','OnABus','InTheRain','ByTheLake'];
   function pick(a){var r=new Uint32Array(1);crypto.getRandomValues(r);return a[r[0]%a.length]}
   function make(){var n=new Uint32Array(1);crypto.getRandomValues(n);$('.pw-out',pw).textContent=pick(A)+'-'+pick(B)+'-'+pick(C)+'-'+(10+n[0]%90)}
   $('button',pw).addEventListener('click',function(e){make();burst(e.clientX,e.clientY)});make();
@@ -222,9 +236,9 @@ $$('.checklist').forEach(function(cl){
 var ag=$('#agree');
 if(ag){
   var outL=$('.agree-out ul',ag),boxes2=$$('input[type=checkbox]',ag);
-  function upd2(){var picked=boxes2.filter(function(b){return b.checked});outL.innerHTML=picked.length?picked.map(function(b){return '<li>'+esc(b.value)+'</li>'}).join(''):'<li>Tick a few promises to build your agreement.</li>'}
+  function upd2(){var picked=boxes2.filter(function(b){return b.checked});outL.innerHTML=picked.length?picked.map(function(b){return '<li>'+esc(b.value)+'</li>'}).join(''):'<li>'+UI.tickPromises+'</li>'}
   boxes2.forEach(function(b){b.addEventListener('change',upd2)});upd2();
-  var cb=$('.copy-agree',ag);cb.addEventListener('click',function(){var t='Our family online agreement\n'+boxes2.filter(function(b){return b.checked}).map(function(b){return '• '+b.value}).join('\n');
-    try{navigator.clipboard.writeText(t).then(function(){cb.textContent='Copied ✓';setTimeout(function(){cb.textContent='Copy agreement'},1800)},function(){cb.textContent='Copy not allowed here'})}catch(x){cb.textContent='Copy not allowed here'}});
+  var cb=$('.copy-agree',ag);cb.addEventListener('click',function(){var t=UI.agreeTitle+'\n'+boxes2.filter(function(b){return b.checked}).map(function(b){return '• '+b.value}).join('\n');
+    try{navigator.clipboard.writeText(t).then(function(){cb.textContent=UI.copied;setTimeout(function(){cb.textContent=UI.copyAgree},1800)},function(){cb.textContent=UI.copyNo})}catch(x){cb.textContent=UI.copyNo}});
 }
 })();
